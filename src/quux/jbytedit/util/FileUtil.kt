@@ -40,7 +40,11 @@ object FileUtil {
         val file = JarFile(selectedJar)
         for (entry in file.entries()) {
             if (classes.containsKey(entry.name.slice(0..entry.name.lastIndex - 6))) {
-                val writer = ClassWriter(0)
+                val writer = object : ClassWriter(ClassWriter.COMPUTE_FRAMES) {
+                    override fun getCommonSuperClass(type1: String, type2: String): String {
+                        return "java/lang/Object"
+                    }
+                }
                 val node = classes[entry.name.slice(0..entry.name.lastIndex - 6)] ?: continue
                 output.putNextEntry(JarEntry(entry.name))
                 Edit.fixExceptionTable(node)
